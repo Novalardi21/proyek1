@@ -1,0 +1,144 @@
+@import url("https://fonts.googleapis.com/css2?family=Cherry+Swash:wght@400;700&family=Imperial+Script&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Parisienne&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+body {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* background hero (sesuaikan background image jika perlu) */
+/* .bg-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url("/images/hero-bg.jpg") center/cover no-repeat;
+} */
+
+/* Satu-satunya background image: HERO wrapper */
+.hero-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* atur sesuai tinggi yang diinginkan */
+    background: linear-gradient(
+            to right,
+            rgba(0, 128, 128, 0.7),
+            rgba(0, 26, 26, 0.7)
+        ),
+        url("/images/image.png") center/cover no-repeat;
+
+    display: flex;
+    flex-direction: column; /* taruh anak-anak (nav + hero) ke bawah */
+    align-items: center;    /* tengah horizontal */
+    padding-top: 20px;
+}
+
+/* pastikan nav transparan supaya background kelihatan */
+.bg-hero {
+    background: transparent !important;
+}
+
+/* teks hero (di atas background) */
+.hero-content {
+    position: relative;
+    z-index: 30;
+    color: #fff;
+    margin-top: 60px;  /* kasih jarak biar gak nempel navbar */
+    max-width: 640px;
+    text-align: right; /* tengahin teks */
+}
+
+/* styling contoh */
+.muted-hashtag { color: #FFD700; font-weight:700; margin-bottom: 12px; }
+.hero-title { font-size: 64px; line-height: 0.95; font-weight: 800; margin: 0 0 18px; }
+.hero-cta { color: #ffd54a; text-decoration: none; font-weight: 700; }
+
+/* pastikan tidak ada section lain yang memberikan background image lagi */
+
+/* pill wrapper */
+.nav-pill {
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 12px 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    max-width: 1000px; /* sesuaikan lebar */
+    margin-top: -10px; /* sedikit naik di atas hero */
+}
+
+/* logo */
+.logo-img {
+    height: 36px;
+    width: auto;
+}
+
+/* nav links style inside pill */
+.nav-pill .nav-link {
+    color: #1f2937; /* gelap */
+    font-weight: 500;
+    padding: 6px 8px;
+}
+.nav-pill .nav-link.active {
+    color: #0f766e; /* warna active (teal) */
+    text-decoration: underline;
+    text-underline-offset: 6px;
+}
+
+/* tombol belanja */
+.btn-pill-shop {
+    background: #0ea5a2; /* teal */
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(14, 165, 162, 0.25);
+    border: none;
+}
+
+/* language circular flag */
+.lang-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+.flag-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* responsive tweaks */
+@media (max-width: 991.98px) {
+    .nav-pill {
+        padding: 10px 12px;
+    }
+    .nav-pill .navbar-nav {
+        display: none;
+    } /* hide center links on tablet/mobile */
+}
+
+.bg-gradasi {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.bg-gradasi img {
+    display: block;
+    width: 100%;
+}
+
+.bg-gradasi::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(0, 128, 128, 0.6),
+        rgba(0, 26, 26, 0.6)
+    );
+    pointer-events: none; /* biar tidak mengganggu klik */
+}
