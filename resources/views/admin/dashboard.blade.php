@@ -85,4 +85,25 @@
         </div>
     @endif
 
+    @if (Session::get('role') === 'admin_apotek' && isset($admin))
+        @if ($admin->status === 'menunggu')
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="fa-solid fa-xmark-circle me-2 fs-4"></i>
+                <div>
+                    <strong>Akun Anda belum terverifikasi.</strong>
+                    Silakan menunggu hingga 24 jam untuk proses verifikasi dan lengkapi data apotek Anda.
+                </div>
+            </div>
+        @elseif ($admin->status === 'disetujui')
+            <div class="alert alert-success d-flex align-items-center mt-3" role="alert">
+                <i class="fa-solid fa-circle-check me-2 fs-4"></i>
+                <div>
+                    <strong>Akun Anda telah terverifikasi.</strong> Selamat, Anda sekarang dapat mengakses seluruh fitur.
+                </div>
+            </div>
+        @endif
+    @endif
+
+
+
 @endsection

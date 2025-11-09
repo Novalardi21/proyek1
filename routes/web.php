@@ -15,6 +15,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Artikel
 Route::get('/artikel', [HomeController::class, 'Artikel'])->name('artikel');
+Route::get('/apotek/{id}', [HomeController::class, 'detail'])->name('apotek.detail');
+Route::get('/artikel/{id_artikel}', [HomeController::class, 'detailArtikel'])->name('artikel.detail');
 
 //buat map
 Route::get('/reverse', [ReverseController::class, 'reverse'])->name('reverse');
