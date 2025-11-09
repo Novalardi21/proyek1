@@ -467,6 +467,7 @@ class AdminController extends Controller
 
         // Validasi input
         $request->validate([
+            'nama_apotek' => 'nullable|string|max:150',
             'alamat' => 'nullable|string',
             'telepon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
@@ -480,6 +481,7 @@ class AdminController extends Controller
         $apotek = Apotek::findOrFail($id_apotek);
 
         // Update data dasar
+        $apotek->nama_apotek = $request->nama_apotek ?? $apotek->nama_apotek;
         $apotek->alamat = $request->alamat;
         $apotek->telepon = $request->telepon;
         $apotek->email = $request->email;
@@ -509,9 +511,11 @@ class AdminController extends Controller
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
         }
-        if (Session::get('role') !== 'admin_apotek') {
+        $role = Session::get('role');
+        if (!in_array($role, ['admin', 'admin_apotek'])) {
             abort(403, 'Akses ditolak');
         }
+
 
         // $search = $request->query('search');
 
@@ -526,11 +530,21 @@ class AdminController extends Controller
         // }
 
         // $admins = $adminsQuery->orderBy('id_admin', 'desc')->get();
+        $adminName = Session::get('admin_name');
+        $adminId = Session::get('id');
+
+        $admin = Admin::find($adminId);
+        $id_apotek = $admin ? $admin->id_apotek : null;
+
+        $apotek = null;
+        if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
+            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+        }
 
         $title = 'Laporan';
         $adminName = Session::get('admin_name');
 
-        return view('admin.laporan', compact('title', 'adminName'));
+        return view('admin.laporan', compact('title', 'adminName', 'apotek'));
     }
 
     public function verifikasiApotek($id)
