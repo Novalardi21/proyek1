@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RegisterApotekController;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\GoogleController;
 use App\Models\Admin;
 use App\Http\Controllers\kontakController;
 
@@ -14,6 +15,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Artikel
 Route::get('/artikel', [HomeController::class, 'Artikel'])->name('artikel');
+Route::get('/apotek/{id}', [HomeController::class, 'detail'])->name('apotek.detail');
+Route::get('/artikel/{id_artikel}', [HomeController::class, 'detailArtikel'])->name('artikel.detail');
 
 //kontak 
 Route::get('/kontak', [kontakController::class, 'index'])->name('layouts.kontak');
@@ -26,6 +29,9 @@ Route::get('/reverse', [ReverseController::class, 'reverse'])->name('reverse');
 Route::get('/login', [AdminController::class, 'login'])->name('login');
 Route::post('/login', [AdminController::class, 'authenticate'])->name('login.post');
 Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');;
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 

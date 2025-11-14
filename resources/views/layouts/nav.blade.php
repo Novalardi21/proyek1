@@ -11,7 +11,7 @@
             <!-- nav links (center) -->
             <ul class="navbar-nav d-none d-lg-flex flex-row align-items-center gap-3 mb-0">
                 <li class="nav-item">
-                    <a class="nav-link {{ $slug === 'home' ? 'active' : '' }}" href="#">Kemitraan</a>
+                    <a class="nav-link {{ $slug === 'home' ? 'active' : '' }}" href="/">Kemitraan</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ $slug === 'katalog' ? 'active' : '' }}" href="/katalog">Katalog Produk</a>

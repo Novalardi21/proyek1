@@ -66,7 +66,7 @@
                                 {{ $a->status_buka }}
                             </span>
                             <div class="mt-3">
-                                <a href="#"
+                                <a href="{{ route('apotek.detail', $a->id_apotek) }}"
                                     class="btn btn-warning text-white fw-semibold px-4 py-2 rounded-pill shadow-sm">
                                     Lihat Detail
                                 </a>
