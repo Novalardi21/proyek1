@@ -7,13 +7,18 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RegisterApotekController;
 use Illuminate\Support\Facades\Session;
 use App\Models\Admin;
-
+use App\Http\Controllers\kontakController;
 
 //home "/"
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Artikel
 Route::get('/artikel', [HomeController::class, 'Artikel'])->name('artikel');
+
+//kontak 
+Route::get('/kontak', [kontakController::class, 'index'])->name('layouts.kontak');
+Route::post('/kontak/kirim', [kontakController::class, 'kirim'])->name('kontak.kirim');
+
 
 //buat map
 Route::get('/reverse', [ReverseController::class, 'reverse'])->name('reverse');
