@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -77,12 +78,23 @@ class AdminController extends Controller
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
             $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
-            $status = $admin->status; // ambil status admin_apotek
+            $status = $admin->status;
         }
 
         $totalAdminApotek = Admin::where('role', 'admin_apotek')->count();
         $dataApotek = Admin::where('role', 'admin_apotek')
             ->where('status', 'menunggu')
+            ->get();
+
+        $totalObat = Obat::where('id_admin', Session::get('id'))->count();
+
+        $obatHabis = Obat::where('id_admin', Session::get('id'))
+            ->where('stok', 0)
+            ->count();
+
+        $obatTerbaru = Obat::where('id_admin', Session::get('id'))
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
             ->get();
 
         $title = 'Admin Dashboard';
@@ -95,8 +107,12 @@ class AdminController extends Controller
             'dataApotek',
             'apotek',
             'status',
-            'admin'
+            'admin',
+            'totalObat',
+            'obatHabis',
+            'obatTerbaru'
         ));
+
     }
 
     // logout
@@ -276,6 +292,13 @@ class AdminController extends Controller
         $admin = Admin::find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
+        $status = null;
+
+        if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
+            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $status = $admin->status;
+        }
+
         $search = $request->query('search');
         $query = Obat::where('id_admin', $adminId);
 
@@ -297,7 +320,7 @@ class AdminController extends Controller
 
         $obats = $query->orderBy('nama_obat')->get();
 
-        return view('admin.obat', compact('title', 'adminName', 'obats', 'search', 'apotek'));
+        return view('admin.obat', compact('title', 'adminName', 'obats', 'search', 'apotek', 'status'));
     }
 
     public function tambahObat()
@@ -316,11 +339,18 @@ class AdminController extends Controller
         $admin = Admin::find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
+        $status = null;
+
+        if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
+            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $status = $admin->status;
+        }
+
         $apotek = Apotek::where('id_apotek', $id_apotek)->first();
 
         $title = 'Tambah Obat';
 
-        return view('admin.tambah_obat', compact('apotek', 'title', 'adminName'));
+        return view('admin.tambah_obat', compact('apotek', 'title', 'adminName', 'status'));
     }
 
     public function storeObat(Request $request)
@@ -355,7 +385,7 @@ class AdminController extends Controller
             'harga' => $request->harga,
             'id_apotek' => $idApotek,
             'id_admin' => $adminId,
-            'gambar_obat' => $pathGambar, // ✅ simpan path gambar
+            'gambar_obat' => $pathGambar,
         ]);
 
         return redirect()->route('admin.obat')->with('success', 'Data obat berhasil ditambahkan.');
@@ -376,6 +406,13 @@ class AdminController extends Controller
         $admin = Admin::find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
+        $status = null;
+
+        if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
+            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $status = $admin->status;
+        }
+
         $obat = Obat::find($id_obat);
         if (! $obat) {
             return redirect()->route('admin.obat')->with('error', 'Data obat tidak ditemukan.');
@@ -384,7 +421,7 @@ class AdminController extends Controller
         $apotek = Apotek::where('id_apotek', $id_apotek)->first();
         $title = 'Edit Obat';
 
-        return view('admin.editobat', compact('obat', 'apotek', 'title'));
+        return view('admin.editobat', compact('obat', 'apotek', 'title', 'adminName', 'status'));
     }
 
     public function updateObat(Request $request, $id_obat)
@@ -581,34 +618,84 @@ class AdminController extends Controller
             }
         }
 
-        // $search = $request->query('search');
-
-        // $adminsQuery = Admin::where('role', 'admin_apotek');
-
-        // if (! empty($search)) {
-        //     $adminsQuery->where(function ($q) use ($search) {
-        //         $q->where('username', 'like', "%{$search}%")
-        //             ->orWhere('nama_apotek', 'like', "%{$search}%")
-        //             ->orWhere('nama_penanggung_jawab', 'like', "%{$search}%");
-        //     });
-        // }
-
-        // $admins = $adminsQuery->orderBy('id_admin', 'desc')->get();
         $adminName = Session::get('admin_name');
         $adminId = Session::get('id');
-
         $admin = Admin::find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
+
+        $status = null;
+
+        if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
+            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $status = $admin->status;
+        }
 
         $apotek = null;
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
             $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
         }
 
-        $title = 'Laporan';
-        $adminName = Session::get('admin_name');
+        $from = $request->query('from'); // YYYY-MM-DD
+        $to = $request->query('to');
 
-        return view('admin.laporan', compact('title', 'adminName', 'apotek'));
+        $data = collect();
+
+        // tampilkan data hanya jika user telah mengisi from & to
+        if ($from && $to) {
+            $query = Obat::query()
+                ->select('id_obat', 'nama_obat', 'kategori', 'stok', 'harga', 'created_at');
+
+            // batasi per apotek bila role admin_apotek
+            if ($role === 'admin_apotek' && $id_apotek) {
+                $query->where('id_apotek', $id_apotek);
+            }
+
+            // filter berdasarkan created_at antara from..to (inklusif)
+            $query->whereBetween(\DB::raw('DATE(created_at)'), [$from, $to]);
+
+            // urutkan newest first (sesuai desain kamu; atur sesuai kebutuhan)
+            $data = $query->orderBy('created_at', 'asc')->get();
+        }
+
+        $title = 'Laporan';
+
+        return view('admin.laporan', compact('title', 'adminName', 'apotek', 'status', 'data', 'from', 'to'));
+    }
+
+    public function exportLaporan(Request $request)
+    {
+        $request->validate([
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+        ]);
+
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        $adminId = session('id');
+        $role = session('role');
+        $admin = Admin::find($adminId);
+        $id_apotek = $admin ? $admin->id_apotek : null;
+
+        $query = Obat::query()
+            ->select('id_obat', 'nama_obat', 'kategori', 'stok', 'harga', 'created_at');
+
+        if ($role === 'admin_apotek' && $id_apotek) {
+            $query->where('id_apotek', $id_apotek);
+        }
+
+        $query->whereBetween(\DB::raw('DATE(created_at)'), [$from, $to]);
+        $data = $query->orderBy('created_at', 'asc')->get();
+
+        // tambahkan total nilai stok keseluruhan (opsional)
+        $totalNilai = $data->sum(function ($item) {
+            return $item->stok * $item->harga;
+        });
+
+        $pdf = Pdf::loadView('admin.pdf.laporan_stok', compact('data', 'from', 'to', 'totalNilai'));
+        $filename = 'laporan-stok-'.$from.'-sampai-'.$to.'.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function verifikasiApotek($id)

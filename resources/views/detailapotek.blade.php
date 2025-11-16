@@ -132,7 +132,7 @@
                     <i class="bi bi-geo-alt-fill"></i> Lihat di Google Maps
                 </a>
             @else
-                <p class="text-muted mt-2">Lokasi belum ditambahkan</p>
+                <p class="mt-2 text-white">Lokasi belum ditambahkan</p>
             @endif
         </div>
 

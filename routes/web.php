@@ -55,6 +55,7 @@ Route::put('/admin/obat/update/{id_obat}', [AdminController::class, 'updateObat'
 Route::get('/admin/profile', [AdminController::class, 'ProfileApotek'])->name('admin.profile');
 Route::put('/admin/profile/update/{id_apotek}', [AdminController::class, 'updateApotek'])->name('apotek.update');
 Route::get('/admin/laporan', [AdminController::class, 'Laporan'])->name('admin.laporan');
+Route::get('/admin/laporan/export', [AdminController::class, 'exportLaporan'])->name('admin.laporan.export');
 
 
 Route::get('/apotek/register', [RegisterApotekController::class, 'create'])->name('apotek.create');
