@@ -14,6 +14,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Artikel
 Route::get('/artikel', [HomeController::class, 'Artikel'])->name('artikel');
+Route::get('/artikel/detail/{id_artikel}', [HomeController::class, 'detailArtikel'])->name('artikel.detail');
+
+//detail apotek
+Route::get('/detail/{id}', [HomeController::class, 'detail'])->name('apotek.detail');
 
 //kontak 
 Route::get('/kontak', [kontakController::class, 'index'])->name('layouts.kontak');
