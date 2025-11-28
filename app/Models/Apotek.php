@@ -19,8 +19,9 @@ class Apotek extends Model
         'telepon',
         'email',
         'jam_operasional',
-        'deskripsi',
         'status_buka',
+        'deskripsi',
+        'link_lokasi',
         'foto_apotek',
     ];
 

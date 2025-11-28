@@ -79,8 +79,8 @@
                     </a>
                     <a href="#"
                         class="nav-link {{ request()->is('admin/artikel') ? 'active' : '' }}">
-                        <span class="nav-icon text-warning"><i class="fa-solid fa-newspaper"></i></span>
-                        <span class="nav-text text-black ms-2">KO</span>
+                        <span class="nav-icon text-warning"><i class="fa-solid fa-address-book"></i></span>
+                        <span class="nav-text text-black ms-2">Kontak</span>
                     </a>
                 @endif
 

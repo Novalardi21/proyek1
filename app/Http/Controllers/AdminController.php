@@ -569,6 +569,7 @@ class AdminController extends Controller
         if (! in_array($role, ['admin', 'admin_apotek'])) {
             abort(403, 'Akses ditolak');
         }
+        // dd($id_apotek, $request->all());
 
         $admin = Admin::find(Session::get('id'));
 
