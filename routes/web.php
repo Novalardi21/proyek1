@@ -8,6 +8,7 @@ use App\Http\Controllers\RegisterApotekController;
 use Illuminate\Support\Facades\Session;
 use App\Models\Admin;
 use App\Http\Controllers\kontakController;
+use App\Http\Controllers\GoogleController;
 
 //home "/"
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -18,6 +19,10 @@ Route::get('/artikel/detail/{id_artikel}', [HomeController::class, 'detailArtike
 
 //detail apotek
 Route::get('/detail/{id}', [HomeController::class, 'detail'])->name('apotek.detail');
+
+//google
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 //kontak 
 Route::get('/kontak', [kontakController::class, 'index'])->name('layouts.kontak');
