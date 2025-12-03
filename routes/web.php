@@ -41,7 +41,7 @@ Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
 Route::get('/admin/admin', [AdminController::class, 'admin'])->name('admin.list');
-Route::get('/admin/apotek', [AdminController::class, 'apotek'])->name('admin.apotek');
+Route::get('/admin/apotek', [AdminController::class, 'apotek'])->name('admin.listapotek');
 Route::get('/admin/artikel', [AdminController::class, 'artikel'])->name('admin.artikel');
 Route::get('/admin/artikel/tambah', [AdminController::class, 'Tambahartikel'])->name('admin.artikel.tambah');
 Route::post('/admin/artikel/store', [AdminController::class, 'storeArtikel'])->name('admin.artikel.store');
@@ -50,6 +50,9 @@ Route::get('/admin/apotek/{id}', [AdminController::class, 'detailApotek'])->name
 Route::get('/admin/artikel/edit/{id}', [AdminController::class, 'editArtikel'])->name('admin.artikel.edit');
 Route::put('/admin/artikel/update/{id}', [AdminController::class, 'updateArtikel'])->name('admin.artikel.update');
 Route::delete('/admin/artikel/delete/{id}', [AdminController::class, 'deleteArtikel'])->name('admin.artikel.delete');
+
+Route::get('/admin/kontak', [AdminController::class, 'DaftarPesan'])->name('admin.kontak');
+Route::get('/admin/kontak/{id}', [AdminController::class, 'detailPesan'])->name('admin.kontak.detail');
 
 //Admin apotek
 Route::get('/admin/obat', [AdminController::class, 'obat'])->name('admin.obat');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use App\Models\Apotek;
 use App\Models\Artikel;
+use App\Models\Kontak;
 use App\Models\Obat;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -748,6 +749,33 @@ class AdminController extends Controller
             ->where('status', 'menunggu')
             ->get();
 
-        return view('admin.daftar_apotek', compact('dataApotek'));
+        return view('admin.apotek', compact('dataApotek'));
+    }
+
+    public function DaftarPesan()
+    {
+        $title = 'Kelola Pesan';
+
+        // ambil semua pesan, paling baru di atas
+        $pesan = Kontak::orderBy('created_at', 'desc')->get();
+
+        return view('admin.kontak', compact('title', 'pesan'));
+    }
+
+    public function detailPesan($id)
+    {
+        if (! Session::has('role')) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
+        }
+        if (Session::get('role') !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
+
+        $kontak = Kontak::where('id', $id)->firstOrFail();
+
+        $title = 'Detail Kontak';
+        $adminName = Session::get('admin_name');
+
+        return view('admin.detailKontak', compact('kontak', 'title', 'adminName'));
     }
 }

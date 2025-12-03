@@ -51,7 +51,7 @@ class RegisterApotekController extends Controller
 
             return redirect()->route('login')->with(
                 'success',
-                'Pendaftaran berhasil! Silakan tunggu verifikasi dari admin.'
+                'Pendaftaran berhasil! Silahkan Login.'
             );
         } catch (\Throwable $e) {
             DB::rollBack();

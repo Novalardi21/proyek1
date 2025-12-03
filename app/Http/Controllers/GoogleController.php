@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Laravel\Socialite\Facades\Socialite;
 use App\Models\Admin;
 use App\Models\Apotek;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class GoogleController extends Controller
 {
@@ -22,15 +20,15 @@ class GoogleController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
             $admin = Admin::where('email', $googleUser->getEmail())->first();
 
-            if (!$admin) {
+            if (! $admin) {
 
                 DB::beginTransaction();
                 $apotek = Apotek::create([
-                    'nama_apotek' => 'Apotek ' . $googleUser->getName() ,
+                    'nama_apotek' => 'Apotek '.$googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                 ]);
 
@@ -59,7 +57,8 @@ class GoogleController extends Controller
                 ->with('success', 'Login menggunakan Google berhasil!');
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect('/login')->with('error', 'Gagal login menggunakan Google. (' . $e->getMessage() . ')');
+
+            return redirect('/login')->with('error', 'Gagal login menggunakan Google. ('.$e->getMessage().')');
         }
     }
 }
