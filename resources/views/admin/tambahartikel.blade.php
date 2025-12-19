@@ -41,7 +41,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
+ 
                     <div class="text-end mt-4">
                         <a href="{{ route('admin.artikel') }}" class="btn btn-secondary me-2 px-4">Kembali</a>
                         <button type="submit" class="btn btn-primary px-4">Simpan</button>

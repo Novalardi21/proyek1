@@ -232,15 +232,24 @@ class AdminController extends Controller
         $artikel->tanggal_publikasi = now();
 
         if ($request->hasFile('gambar')) {
-            $file = $request->file('gambar');
-            $filename = time().'_'.$file->getClientOriginalName();
-            $file->move(public_path('uploads/artikel'), $filename);
-            $artikel->gambar = $filename;
+
+            // hapus gambar lama kalau ada
+            if ($artikel->gambar && Storage::disk('public')->exists($artikel->gambar)) {
+                Storage::disk('public')->delete($artikel->gambar);
+            }
+
+            // simpan gambar baru ke folder "artikel" di disk public
+            // hasilnya: "artikel/namafileacak.jpg"
+            $path = $request->file('gambar')->store('artikel', 'public');
+
+            // simpan path ke kolom "gambar"
+            $artikel->gambar = $path;   // contoh: "artikel/X4mveNVK..."
         }
 
         $artikel->save();
 
-        return redirect()->route('admin.artikel')->with('success', 'Artikel berhasil diperbarui.');
+        return redirect()->route('admin.artikel')
+            ->with('success', 'Artikel berhasil diperbarui.');
     }
 
     public function deleteArtikel($id)

@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/Logo_remove.png') }}">
     <style>
         :root {
             --teal: #008080;
@@ -131,6 +132,40 @@
                 width: 90%;
             }
         }
+
+        .btn-google {
+            background: #ffffff;
+            color: #444;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .btn-google:hover {
+            background: #f7f7f7;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+            color: #222;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .back-home-link {
+            color: #6b7280;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .back-home-link:hover {
+            color: #008080;
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -176,8 +211,11 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary-cta">Masuk</button>
-                    <a href="{{ route('google.login') }}" class="btn btn-danger w-100">
-                        <i class="fab fa-google me-2"></i> Login dengan Google
+                    <a href="{{ route('google.login') }}"
+                        class="btn btn-google w-100 d-flex align-items-center justify-content-center gap-2">
+                        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google"
+                            class="google-icon">
+                        <span>Login dengan Google</span>
                     </a>
 
                     <p class="small-note">
@@ -189,6 +227,12 @@
                     </p>
 
                 </form>
+                <p class="small-note text-center mt-3">
+                    <a href="{{ url('/') }}" class="back-home-link">
+                        ← Kembali ke Beranda
+                    </a>
+                </p>
+
             </div>
         </div>
     </div>

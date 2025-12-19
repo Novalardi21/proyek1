@@ -6,7 +6,7 @@
     <div class="hero-content container">
         <p class="muted-hashtag">#ApotekTapiOnline</p>
         <h1 class="hero-title">Platform<br>Apotek<br>Online</h1>
-        <a class="hero-cta" href="#">Tentang MediFinder →</a>
+        <a class="hero-cta" href="{{ url('/#about-us') }}">Tentang MediFinder →</a>
     </div>
 @endsection
 
@@ -16,7 +16,7 @@
         {{-- Bagian Tentang & Lokasi --}}
         <div class="row align-items-center mb-5">
             {{-- Kolom Kiri: Tentang --}}
-            <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="col-lg-6 mb-4 mb-lg-0" id="about-us">
                 <h2 class="fw-bold mb-3">Tentang Medifinder</h2>
                 <h1 class="fw-bold" style="color:#008080; line-height:1.2;">
                     <em>Platform</em> Khusus<br>Untuk Pencarian<br>Apotek Online
