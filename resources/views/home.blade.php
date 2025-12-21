@@ -141,11 +141,15 @@
         // REVERSE GEOCODE VIA BACKEND
         // =========================
         async function reverseViaProxy(lat, lon) {
-            const url = "{{ route('reverse') }}" +
-                "?lat=" + encodeURIComponent(lat) +
+            const url = "/reverse?lat=" + encodeURIComponent(lat) +
                 "&lon=" + encodeURIComponent(lon);
 
-            const resp = await fetch(url);
+            const resp = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             return await resp.json();
         }
