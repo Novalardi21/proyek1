@@ -14,14 +14,30 @@ class HomeController extends Controller
         $slug = 'home';
         $konten = 'Ini konten';
 
-        $lokasi = $request->query('lokasi');
+        // 1. Ambil lokasi dari query ATAU session
+        $lokasi = $request->query('lokasi')
+            ?? $request->session()->get('lokasi');
+
+        // 2. Jika ada di query, simpan ke session
+        if ($request->query('lokasi')) {
+            $request->session()->put('lokasi', $lokasi);
+        }
+
+        $lokasi = $lokasi ? trim($lokasi) : null;
+
         $apotek = Apotek::whereHas('admin', function ($query) {
             $query->where('status', 'Disetujui');
         });
 
         if ($lokasi) {
-            $apotek->where('alamat', 'LIKE', "%{$lokasi}%");
+            $lokasiLower = strtolower($lokasi);
+
+            $apotek->whereRaw(
+                'LOWER(alamat) REGEXP ?',
+                ['(^|[ ,.-])'.preg_quote($lokasiLower).'([ ,.-]|$)']
+            );
         }
+
         $apotek = $apotek->get();
 
         return view('home', compact('title', 'slug', 'konten', 'apotek', 'lokasi'));
@@ -78,7 +94,6 @@ class HomeController extends Controller
         return view('detail_artikel', compact('title', 'slug', 'artikel'));
     }
 
-    
     public function Katalog(Request $request)
     {
         $title = 'MEDIFINDER - Katalog Obat';

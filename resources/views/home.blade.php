@@ -118,64 +118,113 @@
     </style>
 
     <script>
+        // =========================
+        // INIT MAP
+        // =========================
         const map = L.map('map').fitWorld();
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
         let userMarker = null;
 
+        // =========================
+        // CEK APAKAH LOKASI SUDAH ADA
+        // =========================
+        const urlParams = new URLSearchParams(window.location.search);
+        const lokasiSudahAda =
+            urlParams.has('lokasi') ||
+            sessionStorage.getItem('lokasi-set') === '1';
+
+        // =========================
+        // REVERSE GEOCODE VIA BACKEND
+        // =========================
         async function reverseViaProxy(lat, lon) {
-            const url = "{{ route('reverse') }}?lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lon);
+            const url = "{{ route('reverse') }}" +
+                "?lat=" + encodeURIComponent(lat) +
+                "&lon=" + encodeURIComponent(lon);
+
             const resp = await fetch(url);
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             return await resp.json();
         }
 
+        // =========================
+        // SAAT LOKASI DITEMUKAN
+        // =========================
         async function onLocationFound(e) {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
             const userLatLng = e.latlng;
 
-            if (userMarker) userMarker.setLatLng(userLatLng);
-            else userMarker = L.marker(userLatLng).addTo(map).bindPopup('Lokasi Anda').openPopup();
+            if (userMarker) {
+                userMarker.setLatLng(userLatLng);
+            } else {
+                userMarker = L.marker(userLatLng)
+                    .addTo(map)
+                    .bindPopup('Lokasi Anda')
+                    .openPopup();
+            }
 
             map.setView(userLatLng, 15);
 
             try {
                 const json = await reverseViaProxy(lat, lon);
                 const addr = json.address || {};
+
                 const kel = addr.suburb || addr.village || '';
                 const kec = addr.city_district || addr.county || '';
                 const kota = addr.city || '';
                 const prov = addr.state || '';
 
-                const text = [kel, `Kec.${kec}`, kota, prov].filter(Boolean).join(', ');
+                const text = [kel, kec && `Kec.${kec}`, kota, prov]
+                    .filter(Boolean)
+                    .join(', ');
 
                 document.getElementById('address').textContent = text;
-                document.getElementById('namaWilayah').textContent = text;
+                document.getElementById('namaWilayah').textContent = text || 'Wilayah Anda';
 
-                // ⛔️ Cegah reload berulang
-                const currentParams = new URLSearchParams(window.location.search);
-                if (!currentParams.has('lokasi') && kel) {
-                    window.location.href = "/?lokasi=" + encodeURIComponent(kel);
+                // =========================
+                // REDIRECT SEKALI SAJA
+                // =========================
+                if (!lokasiSudahAda && kel) {
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('lokasi', kel);
+
+                    sessionStorage.setItem('lokasi-set', '1');
+                    window.location.replace(newUrl.toString());
                 }
 
             } catch (err) {
+                console.error(err);
                 document.getElementById('address').textContent = 'Gagal memuat lokasi';
             }
         }
 
+        // =========================
+        // JIKA USER TOLAK LOKASI
+        // =========================
         function onLocationError(e) {
-            document.getElementById('address').textContent = 'Tidak dapat mengambil lokasi: ' + e.message;
-            map.setView([-6.3265, 108.3215], 13);
+            document.getElementById('address').textContent =
+                'Lokasi tidak diizinkan, menampilkan lokasi default';
+
+            document.getElementById('namaWilayah').textContent = 'Indonesia';
+
+            // Default: Jakarta
+            map.setView([-6.200000, 106.816666], 12);
         }
 
+        // =========================
+        // AMBIL LOKASI HANYA SEKALI
+        // =========================
         map.locate({
             setView: false,
             maxZoom: 16
         });
+
         map.on('locationfound', onLocationFound);
         map.on('locationerror', onLocationError);
     </script>
+
 @endsection
