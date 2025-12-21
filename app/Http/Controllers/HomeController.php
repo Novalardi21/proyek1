@@ -14,11 +14,10 @@ class HomeController extends Controller
         $slug = 'home';
         $konten = 'Ini konten';
 
-        // 1. Ambil lokasi dari query ATAU session
+        // Ambil lokasi dari query atau session
         $lokasi = $request->query('lokasi')
             ?? $request->session()->get('lokasi');
 
-        // 2. Jika ada di query, simpan ke session
         if ($request->query('lokasi')) {
             $request->session()->put('lokasi', $lokasi);
         }
@@ -31,11 +30,21 @@ class HomeController extends Controller
 
         if ($lokasi) {
             $lokasiLower = strtolower($lokasi);
+            $driver = \DB::getDriverName();
 
-            $apotek->whereRaw(
-                'LOWER(alamat) REGEXP ?',
-                ['(^|[ ,.-])'.preg_quote($lokasiLower).'([ ,.-]|$)']
-            );
+            if ($driver === 'mysql') {
+                // MySQL: REGEXP (lebih presisi)
+                $apotek->whereRaw(
+                    'LOWER(alamat) REGEXP ?',
+                    ['(^|[ ,.-])'.preg_quote($lokasiLower).'([ ,.-]|$)']
+                );
+            } else {
+                // SQLite / lainnya: LIKE
+                $apotek->whereRaw(
+                    'LOWER(alamat) LIKE ?',
+                    ['%'.$lokasiLower.'%']
+                );
+            }
         }
 
         $apotek = $apotek->get();
