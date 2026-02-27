@@ -17,7 +17,7 @@
         <div class="row align-items-center mb-5">
             {{-- Kolom Kiri: Tentang --}}
             <div class="col-lg-6 mb-4 mb-lg-0" id="about-us">
-                <h2 class="fw-bold mb-3">Tentang Medifinder yang the best bangett</h2>
+                <h2 class="fw-bold mb-3">Tentang Medifinder yang the best bangett ttt</h2>
                 <h1 class="fw-bold" style="color:#008080; line-height:1.2;">
                     <em>Platform</em> Khusus<br>Untuk Pencarian<br>Apotek Online
                 </h1>

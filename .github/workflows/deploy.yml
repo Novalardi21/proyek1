@@ -12,23 +12,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    # 1️⃣ Install dependency (termasuk dev) untuk testing
-    - name: Install Dependencies
-      run: composer install
-
-    # 2️⃣ Generate app key (kalau belum ada)
-    - name: Copy .env
-      run: cp .env.example .env
-
-    - name: Generate Key
-      run: php artisan key:generate
-
-    # 3️⃣ Jalankan testing
-    # - name: Run Tests
-    #   run: php artisan test
-
-    # 4️⃣ Deploy ke server (hanya jika test sukses)
     - name: SSH Deploy
       if: success()
       uses: appleboy/ssh-action@v1
