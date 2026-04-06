@@ -6,23 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('admin', function (Blueprint $table) {
-            $table->string('google_id')->nullable();
+
+            $table->string('email')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('admin', function (Blueprint $table) {
-            //
+            $table->dropColumn([
+                'email',
+                'google_id',
+                'temp_password',
+                'id_apotek',
+                'status',
+            ]);
         });
     }
 };
