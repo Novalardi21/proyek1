@@ -132,7 +132,7 @@ jobs:
             docker pull ghcr.io/novalardi21/proyek1:latest
 
             # Update container
-            docker compose up -d --remove-orphans
+            docker-compose up -d --remove-orphans
 
             # Tunggu container siap
             echo "⏳ Menunggu container ready..."
