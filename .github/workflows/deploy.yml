@@ -139,6 +139,6 @@ jobs:
             sleep 10
 
             # Migrasi database
-            docker compose exec -T app php artisan migrate --force --no-interaction
+            docker-compose exec app php artisan migrate --force --no-interaction
 
             echo "✅ Deployment selesai!"
