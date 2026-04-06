@@ -103,7 +103,7 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Masuk ke folder project
-            cd /home/${{ secrets.SERVER_USER }}/project_noval
+            cd /home/${{ secrets.SERVER_USER }}/kelompok3
 
             # Pull image terbaru
             docker pull ghcr.io/${{ github.repository }}:latest
