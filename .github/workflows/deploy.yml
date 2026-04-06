@@ -15,6 +15,22 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing
+          MYSQL_USER: laravel
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,8 +47,20 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
 
+      - name: Setup environment for testing
+        run: |
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=laravel/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=secret/' .env
+
       - name: Generate app key
         run: php artisan key:generate
+
+      - name: Run migrations
+        run: php artisan migrate
 
       - name: Run PHPUnit tests
         run: php artisan test
@@ -46,9 +74,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    outputs:
-      image: ${{ steps.meta.outputs.tags }}
 
     steps:
       - name: Checkout code
@@ -108,14 +133,14 @@ jobs:
             # Pull image terbaru
             docker pull ghcr.io/${{ github.repository }}:latest
 
-            # Update container tanpa downtime besar
+            # Update container
             docker compose up -d --remove-orphans
 
             # Tunggu container siap
             echo "⏳ Menunggu container ready..."
             sleep 10
 
-            # Jalankan migrasi database
+            # Migrasi database
             docker compose exec -T app php artisan migrate --force --no-interaction
 
             echo "✅ Deployment selesai!"
