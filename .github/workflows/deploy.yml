@@ -129,7 +129,7 @@ jobs:
             cd /home/${{ secrets.SERVER_USER }}/kelompok3
 
             # Pull image terbaru
-            docker pull ghcr.io/${{ github.repository }}:latest
+            docker pull ghcr.io/novalardi21/proyek1:latest
 
             # Update container
             docker compose up -d --remove-orphans
