@@ -132,13 +132,13 @@ jobs:
             docker pull ghcr.io/novalardi21/proyek1:latest
 
             # Update container
-            docker compose up -d --build --force-recreate
+            docker-compose up -d --build --force-recreate
 
             # Tunggu container siap
             echo "⏳ Menunggu container ready..."
             sleep 10
 
             # Migrasi database
-            docker compose exec -T app php artisan migrate --force --no-interaction
+            docker-compose exec -T app php artisan migrate --force --no-interaction
 
             echo "✅ Deployment selesai!"
