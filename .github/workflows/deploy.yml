@@ -132,7 +132,9 @@ jobs:
             docker pull ghcr.io/novalardi21/proyek1:latest
 
             # Update container
-            docker-compose up -d --build --force-recreate
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
 
             # Tunggu container siap
             echo "⏳ Menunggu container ready..."
