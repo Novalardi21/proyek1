@@ -159,8 +159,12 @@ jobs:
             docker-compose pull
             docker-compose up -d
 
-            echo "⏳ Menunggu container..."
-            sleep 10
+            echo "⏳ Menunggu database ready..."
+
+            until docker-compose exec -T db mysqladmin ping -h"127.0.0.1" --silent; do
+              echo "⏳ Waiting for MySQL..."
+              sleep 3
+            done
 
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
