@@ -21,10 +21,8 @@ class RegisterTest extends TestCase
             'nama_apotek' => 'Apotek Test',
         ]);
 
-        // cek redirect
         $response->assertRedirect(route('login'));
 
-        // cek data masuk ke DB
         $this->assertDatabaseHas('admin', [
             'username' => 'testuser',
             'email' => 'test@mail.com',
@@ -32,7 +30,7 @@ class RegisterTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('apotek', [
-            'nama_apotek' => 'Apotek Sehat',
+            'nama_apotek' => 'Apotek Test',
             'email' => 'test@mail.com',
         ]);
     }
@@ -40,16 +38,14 @@ class RegisterTest extends TestCase
     /** @test */
     public function register_gagal_jika_email_duplikat()
     {
-        // buat data awal
-        Admin::create([
-            'username' => 'lama',
-            'email' => 'test@mail.com',
-            'password' => bcrypt('password'),
+        // 🔥 pakai factory
+        Admin::factory()->create([
+            'email' => 'test@mail.com'
         ]);
 
-        $response = $this->post('/register', [
+        $response = $this->from('/apotek/register')->post('/apotek/register', [
             'username' => 'baru',
-            'email' => 'test@mail.com', // duplicate
+            'email' => 'test@mail.com',
             'password' => 'password',
             'password_confirmation' => 'password',
             'nama_apotek' => 'Apotek Baru',

@@ -44,6 +44,12 @@ jobs:
           else
             echo "PHPStan not installed, skipping..."
           fi
+      
+      - name: Run migrations
+        run: php artisan migrate
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
 
       # 🔥 Test pakai SQLite (tanpa MySQL)
       - name: Run Unit & Feature Tests
