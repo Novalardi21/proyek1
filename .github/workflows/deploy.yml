@@ -11,26 +11,10 @@ env:
 
 jobs:
 
-  # ─── JOB 1: TESTING ───────────────────────────────────────
+  # ─── JOB 1: TESTING (FAST & CLEAN) ───────────────────────
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testing
-          MYSQL_USER: laravel
-          MYSQL_PASSWORD: secret
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
 
     steps:
       - name: Checkout code
@@ -40,7 +24,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo, pdo_mysql, bcmath
+          extensions: mbstring, pdo, sqlite, pdo_sqlite
+          coverage: xdebug
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist
@@ -48,35 +33,29 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
 
-      - name: Setup environment for testing
-        run: |
-          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
-          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
-          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=laravel/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=secret/' .env
-
-      # ✅ FIX PENTING: BUILD VITE DI TEST
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install NPM dependencies
-        run: npm install
-
-      - name: Build Vite assets
-        run: npm run build
-
       - name: Generate app key
         run: php artisan key:generate
 
-      - name: Run migrations
-        run: php artisan migrate
+      # 🔥 Static Analysis
+      - name: Run Static Analysis (PHPStan)
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse --level=5
+          else
+            echo "PHPStan not installed, skipping..."
+          fi
 
-      - name: Run PHPUnit tests
-        run: php artisan test
+      # 🔥 Test pakai SQLite (tanpa MySQL)
+      - name: Run Unit & Feature Tests
+        run: php artisan test --coverage --min=80
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: false
 
 
   # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
@@ -93,7 +72,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ BUILD VITE LAGI UNTUK MASUK KE IMAGE
+      # Node untuk Vite
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -105,6 +84,7 @@ jobs:
       - name: Build Vite assets
         run: npm run build
 
+      # Docker login
       - name: Login ke GHCR
         uses: docker/login-action@v3
         with:
@@ -166,6 +146,7 @@ jobs:
               sleep 3
             done
 
+            # 🔥 MIGRATE PRODUCTION
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
             echo "✅ Deployment selesai!"
