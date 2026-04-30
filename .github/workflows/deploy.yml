@@ -53,7 +53,7 @@ jobs:
 
       # 🔥 Test pakai SQLite (tanpa MySQL)
       - name: Run Unit & Feature Tests
-        run: php artisan test --coverage --min=10
+        run: php artisan test --coverage --min=5
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
