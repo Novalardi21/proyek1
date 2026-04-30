@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Admin;
-use App\Models\Apotek;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class RegisterTest extends TestCase
 {
@@ -14,13 +13,12 @@ class RegisterTest extends TestCase
     /** @test */
     public function user_bisa_register_apotek()
     {
-        $response = $this->post('/register', [
+        $response = $this->post('/apotek/register', [
             'username' => 'testuser',
             'email' => 'test@mail.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-            'nama_apotek' => 'Apotek Sehat',
-            'nama_penanggung_jawab' => 'Budi',
+            'nama_apotek' => 'Apotek Test',
         ]);
 
         // cek redirect
