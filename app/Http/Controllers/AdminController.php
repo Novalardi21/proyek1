@@ -9,6 +9,7 @@ use App\Models\Kontak;
 use App\Models\Obat;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
@@ -31,7 +32,7 @@ class AdminController extends Controller
             'password' => 'required|string',
         ]);
 
-        $admin = Admin::where('username', $request->username)->first();
+        $admin = Admin::query()->where('username', $request->username)->first();
 
         if (! $admin) {
             return back()->with('error', 'Akun tidak ditemukan.');
@@ -54,7 +55,7 @@ class AdminController extends Controller
         }
 
         // Simpan session
-        Session::put('id', $admin->id);
+        Session::put('id_admin', $admin->id_admin);
         Session::put('role', $admin->role);
         Session::put('admin_name', $admin->username);
 
@@ -72,35 +73,35 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        $admin = Admin::find(Session::get('id'));
+        $admin = Admin::query()->find(Session::get('id_admin'));
 
         $apotek = null;
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status;
         }
 
-        $totalAdminApotek = Admin::where('role', 'admin_apotek')->count();
-        $dataApotek = Admin::where('role', 'admin_apotek')
+        $totalAdminApotek = Admin::query()->where('role', 'admin_apotek')->count();
+        $dataApotek = Admin::query()->where('role', 'admin_apotek')
             ->where('status', 'menunggu')
             ->get();
 
         // jangan ubah ini (sesuai permintaan)
-        $totalObat = Obat::where('id_admin', Session::get('id'))->count();
+        $totalObat = Obat::query()->where('id_admin', Session::get('id_admin'))->count();
 
-        $obatHabis = Obat::where('id_admin', Session::get('id'))
+        $obatHabis = Obat::query()->where('id_admin', Session::get('id_admin'))
             ->where('stok', 0)
             ->count();
 
-        $obatTerbaru = Obat::where('id_admin', Session::get('id'))
+        $obatTerbaru = Obat::query()->where('id_admin', Session::get('id_admin'))
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
         // ===== tambahan: hitung total baris di tabel obat (seluruh data) =====
-        $jumlahDataObat = Obat::count();
+        $jumlahDataObat = DB::table('obat')->count();
 
         $title = 'Admin Dashboard';
         $adminName = Session::get('admin_name');
@@ -139,7 +140,7 @@ class AdminController extends Controller
 
         $search = $request->query('search');
 
-        $adminsQuery = Admin::where('role', 'admin_apotek');
+        $adminsQuery = Admin::query()->where('role', 'admin_apotek');
 
         if (! empty($search)) {
             $adminsQuery->where(function ($q) use ($search) {
@@ -149,7 +150,7 @@ class AdminController extends Controller
             });
         }
 
-        $admins = $adminsQuery->orderBy('id', 'desc')->get();
+        $admins = $adminsQuery->orderBy('id_admin', 'desc')->get();
 
         $title = 'Daftar Admin';
         $adminName = Session::get('admin_name');
@@ -157,7 +158,7 @@ class AdminController extends Controller
         return view('admin.admin', compact('admins', 'title', 'adminName', 'search'));
     }
 
-    public function detailApotek($id)
+    public function detailApotek(int $id)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -166,7 +167,7 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        $apotek = Apotek::where('id_apotek', $id)->firstOrFail();
+        $apotek = Apotek::query()->where('id_apotek', $id)->firstOrFail();
 
         $title = 'Detail Apotek';
         $adminName = Session::get('admin_name');
@@ -208,17 +209,17 @@ class AdminController extends Controller
         return redirect()->route('admin.artikel')->with('success', 'Artikel berhasil ditambahkan!');
     }
 
-    public function editArtikel($id)
+    public function editArtikel(int $id)
     {
         $title = 'Edit Artikel';
-        $artikel = Artikel::findOrFail($id);
+        $artikel = Artikel::query()->findOrFail($id);
 
         return view('admin.editartikel', compact('title', 'artikel'));
     }
 
-    public function updateArtikel(Request $request, $id)
+    public function updateArtikel(Request $request, int $id)
     {
-        $artikel = Artikel::findOrFail($id);
+        $artikel = Artikel::query()->findOrFail($id);
 
         $request->validate([
             'judul' => 'required|string|max:255',
@@ -252,16 +253,16 @@ class AdminController extends Controller
             ->with('success', 'Artikel berhasil diperbarui.');
     }
 
-    public function deleteArtikel($id)
+    public function deleteArtikel(int $id)
     {
-        $artikel = Artikel::findOrFail($id);
+        $artikel = Artikel::query()->findOrFail($id);
 
         // hapus file gambar juga jika ada
         if ($artikel->gambar && file_exists(public_path('uploads/artikel/'.$artikel->gambar))) {
             unlink(public_path('storage/'.$artikel->gambar));
         }
 
-        $artikel->delete();
+        Artikel::query()->whereKey($artikel->getKey())->delete();
 
         return redirect()->route('admin.artikel')->with('success', 'Artikel berhasil dihapus.');
     }
@@ -289,7 +290,7 @@ class AdminController extends Controller
         $admins = $adminsQuery->orderBy('id_apotek', 'desc')->get();
 
         // --- atau jika mau pagination (direkomendasikan untuk banyak data) ---
-        // $admins = $adminsQuery->orderBy('id', 'desc')->paginate(10)->appends($request->query());
+        // $admins = $adminsQuery->orderBy('id_admin', 'desc')->paginate(10)->appends($request->query());
 
         $title = 'Daftar Apotek';
         $adminName = Session::get('admin_name');
@@ -309,7 +310,7 @@ class AdminController extends Controller
         }
 
         if (Session::get('role') === 'admin_apotek') {
-            $admin = Admin::find(Session::get('id'));
+            $admin = Admin::query()->find(Session::get('id_admin'));
             if ($admin && $admin->status === 'menunggu') {
                 return redirect()->route('admin.profile')
                     ->with('error', 'Akun Anda belum terverifikasi. Anda hanya dapat mengakses halaman profil apotek.');
@@ -318,20 +319,20 @@ class AdminController extends Controller
 
         $title = 'Data Obat';
         $adminName = Session::get('admin_name');
-        $adminId = Session::get('id');
+        $adminId = Session::get('id_admin');
 
-        $admin = Admin::find($adminId);
+        $admin = Admin::query()->find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status;
         }
 
         $search = $request->query('search');
-        $query = Obat::where('id_admin', $adminId);
+        $query = Obat::query()->where('id_admin', $adminId);
 
         if ($id_apotek) {
             $query->where('id_apotek', $id_apotek);
@@ -339,7 +340,7 @@ class AdminController extends Controller
 
         $apotek = null;
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
         }
 
         if (! empty($search)) {
@@ -366,18 +367,18 @@ class AdminController extends Controller
         }
 
         $adminName = Session::get('admin_name');
-        $adminId = Session::get('id');
-        $admin = Admin::find($adminId);
+        $adminId = Session::get('id_admin');
+        $admin = Admin::query()->find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status;
         }
 
-        $apotek = Apotek::where('id_apotek', $id_apotek)->first();
+        $apotek = Apotek::query()->where('id_apotek', $id_apotek)->first();
 
         $title = 'Tambah Obat';
 
@@ -394,8 +395,8 @@ class AdminController extends Controller
             'gambar_obat' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $adminId = session('id');
-        $admin = Admin::find($adminId);
+        $adminId = session('id_admin');
+        $admin = Admin::query()->find($adminId);
 
         if (! $admin) {
             return redirect()->back()->with('error', 'Data admin tidak ditemukan.');
@@ -422,7 +423,7 @@ class AdminController extends Controller
         return redirect()->route('admin.obat')->with('success', 'Data obat berhasil ditambahkan.');
     }
 
-    public function editObat($id_obat)
+    public function editObat(int $id_obat)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -433,29 +434,30 @@ class AdminController extends Controller
         }
 
         $adminName = Session::get('admin_name');
-        $adminId = Session::get('id');
-        $admin = Admin::find($adminId);
+        $adminId = Session::get('id_admin');
+        $admin = Admin::query()->find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status;
         }
 
-        $obat = Obat::find($id_obat);
+        /** @var Obat|null $obat */
+        $obat = Obat::query()->find($id_obat);
         if (! $obat) {
             return redirect()->route('admin.obat')->with('error', 'Data obat tidak ditemukan.');
         }
 
-        $apotek = Apotek::where('id_apotek', $id_apotek)->first();
+        $apotek = Apotek::query()->where('id_apotek', $id_apotek)->first();
         $title = 'Edit Obat';
 
         return view('admin.editobat', compact('obat', 'apotek', 'title', 'adminName', 'status'));
     }
 
-    public function updateObat(Request $request, $id_obat)
+    public function updateObat(Request $request, int $id_obat)
     {
         $request->validate([
             'nama_obat' => 'required|string|max:100',
@@ -465,7 +467,8 @@ class AdminController extends Controller
             'gambar_obat' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $obat = Obat::find($id_obat);
+        /** @var Obat|null $obat */
+        $obat = Obat::query()->find($id_obat);
         if (! $obat) {
             return redirect()->route('admin.obat')->with('error', 'Data obat tidak ditemukan.');
         }
@@ -490,7 +493,7 @@ class AdminController extends Controller
         return redirect()->route('admin.obat')->with('success', 'Data obat berhasil diperbarui.');
     }
 
-    public function deleteObat($id)
+    public function deleteObat(int $id)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -500,13 +503,14 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        $obat = Obat::find($id);
+        /** @var Obat|null $obat */
+        $obat = Obat::query()->find($id);
 
         if (! $obat) {
             return redirect()->route('admin.obat')->with('error', 'Data obat tidak ditemukan.');
         }
 
-        $obat->delete();
+        Obat::query()->whereKey($obat->getKey())->delete();
 
         return redirect()->route('admin.obat')->with('success', 'Data obat berhasil dihapus.');
     }
@@ -546,13 +550,13 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        $admin = Admin::find(Session::get('id'));
+        $admin = Admin::query()->find(Session::get('id_admin'));
 
         $apotek = null;
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status; // ambil status admin_apotek
         }
 
@@ -560,8 +564,8 @@ class AdminController extends Controller
         $adminName = Session::get('admin_name');
 
         // Ambil data admin login + relasi apotek
-        $adminId = Session::get('id');
-        $admin = Admin::with('apotek')->find($adminId);
+        $adminId = Session::get('id_admin');
+        $admin = Admin::query()->with('apotek')->find($adminId);
 
         // Ambil data apotek dari relasi
         $apotek = $admin?->apotek;
@@ -569,7 +573,7 @@ class AdminController extends Controller
         return view('admin.profile', compact('title', 'adminName', 'apotek', 'status', 'admin'));
     }
 
-    public function updateApotek(Request $request, $id_apotek)
+    public function updateApotek(Request $request, int $id_apotek)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -581,13 +585,13 @@ class AdminController extends Controller
         }
         // dd($id_apotek, $request->all());
 
-        $admin = Admin::find(Session::get('id'));
+        $admin = Admin::query()->find(Session::get('id_admin'));
 
         $apotek = null;
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status; // ambil status admin_apotek
         }
 
@@ -605,7 +609,7 @@ class AdminController extends Controller
         ]);
 
         // Ambil data apotek berdasarkan ID
-        $apotek = Apotek::findOrFail($id_apotek);
+        $apotek = Apotek::query()->findOrFail($id_apotek);
 
         // Update data dasar
         $apotek->nama_apotek = $request->nama_apotek ?? $apotek->nama_apotek;
@@ -643,7 +647,7 @@ class AdminController extends Controller
         }
 
         if (Session::get('role') === 'admin_apotek') {
-            $admin = Admin::find(Session::get('id'));
+            $admin = Admin::query()->find(Session::get('id_admin'));
             if ($admin && $admin->status === 'menunggu') {
                 return redirect()->route('admin.profile')
                     ->with('error', 'Akun Anda belum terverifikasi. Anda hanya dapat mengakses halaman profil apotek.');
@@ -651,20 +655,20 @@ class AdminController extends Controller
         }
 
         $adminName = Session::get('admin_name');
-        $adminId = Session::get('id');
-        $admin = Admin::find($adminId);
+        $adminId = Session::get('id_admin');
+        $admin = Admin::query()->find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
         $status = null;
 
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
             $status = $admin->status;
         }
 
         $apotek = null;
         if ($role === 'admin_apotek' && $admin && $admin->id_apotek) {
-            $apotek = Apotek::where('id_apotek', $admin->id_apotek)->first();
+            $apotek = Apotek::query()->where('id_apotek', $admin->id_apotek)->first();
         }
 
         $from = $request->query('from'); // YYYY-MM-DD
@@ -675,7 +679,7 @@ class AdminController extends Controller
         // tampilkan data hanya jika user telah mengisi from & to
         if ($from && $to) {
             $query = Obat::query()
-                ->select('id_obat', 'nama_obat', 'kategori', 'stok', 'harga', 'created_at');
+                ->select(['id_obat', 'nama_obat', 'kategori', 'stok', 'harga', 'created_at']);
 
             // batasi per apotek bila role admin_apotek
             if ($role === 'admin_apotek' && $id_apotek) {
@@ -683,7 +687,7 @@ class AdminController extends Controller
             }
 
             // filter berdasarkan created_at antara from..to (inklusif)
-            $query->whereBetween(\DB::raw('DATE(created_at)'), [$from, $to]);
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$from, $to]);
 
             // urutkan newest first (sesuai desain kamu; atur sesuai kebutuhan)
             $data = $query->orderBy('created_at', 'asc')->get();
@@ -704,19 +708,19 @@ class AdminController extends Controller
         $from = $request->query('from');
         $to = $request->query('to');
 
-        $adminId = session('id');
+        $adminId = session('id_admin');
         $role = session('role');
-        $admin = Admin::find($adminId);
+        $admin = Admin::query()->find($adminId);
         $id_apotek = $admin ? $admin->id_apotek : null;
 
         $query = Obat::query()
-            ->select('id_obat', 'nama_obat', 'kategori', 'stok', 'harga', 'created_at');
+            ->select(['id_obat', 'nama_obat', 'kategori', 'stok', 'harga', 'created_at']);
 
         if ($role === 'admin_apotek' && $id_apotek) {
             $query->where('id_apotek', $id_apotek);
         }
 
-        $query->whereBetween(\DB::raw('DATE(created_at)'), [$from, $to]);
+        $query->whereBetween(DB::raw('DATE(created_at)'), [$from, $to]);
         $data = $query->orderBy('created_at', 'asc')->get();
 
         // tambahkan total nilai stok keseluruhan (opsional)
@@ -730,10 +734,10 @@ class AdminController extends Controller
         return $pdf->download($filename);
     }
 
-    public function verifikasiApotek($id)
+    public function verifikasiApotek(int $id)
     {
         // Ambil data admin apotek
-        $admin = Admin::findOrFail($id);
+        $admin = Admin::query()->findOrFail($id);
 
         // Ubah status menjadi disetujui
         $admin->update(['status' => 'disetujui']);
@@ -754,7 +758,7 @@ class AdminController extends Controller
     public function daftarApotek()
     {
         // Ambil semua admin_apotek yang belum diverifikasi
-        $dataApotek = Admin::where('role', 'admin_apotek')
+        $dataApotek = Admin::query()->where('role', 'admin_apotek')
             ->where('status', 'menunggu')
             ->get();
 
@@ -771,7 +775,7 @@ class AdminController extends Controller
         return view('admin.kontak', compact('title', 'pesan'));
     }
 
-    public function detailPesan($id)
+    public function detailPesan(int $id)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -780,7 +784,7 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        $kontak = Kontak::where('id', $id)->firstOrFail();
+        $kontak = Kontak::query()->where('id', $id)->firstOrFail();
 
         $title = 'Detail Kontak';
         $adminName = Session::get('admin_name');

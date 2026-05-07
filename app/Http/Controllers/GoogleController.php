@@ -22,7 +22,7 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $admin = Admin::where('email', $googleUser->getEmail())->first();
+            $admin = Admin::query()->where('email', $googleUser->getEmail())->first();
 
             if (! $admin) {
 
@@ -48,7 +48,7 @@ class GoogleController extends Controller
             }
 
             // Simpan session login
-            Session::put('id', $admin->id);
+            Session::put('id_admin', $admin->id_admin);
             Session::put('admin_name', $admin->nama_penanggung_jawab);
             Session::put('role', $admin->role);
             Session::put('id_apotek', $admin->id_apotek);

@@ -32,6 +32,6 @@ class Obat extends Model
     // Relasi ke model Admin
     public function admin()
     {
-        return $this->belongsTo(Admin::class, 'id_admin', 'id');
+        return $this->belongsTo(Admin::class, 'id_admin', 'id_admin');
     }
 }
