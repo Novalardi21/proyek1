@@ -30,4 +30,5 @@ class Admin extends Model
     {
         return $this->belongsTo(Apotek::class, 'id_apotek', 'id_apotek');
     }
+
 }

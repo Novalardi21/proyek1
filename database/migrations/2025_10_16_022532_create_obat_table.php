@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('obat', function (Blueprint $table) {
-            $table->id(); // id obat (kolom 'id')
+            $table->id('id_obat'); // ID unik obat
             // pastikan tipe sama dengan primary key apotek (biasanya unsignedBigInteger)
             $table->unsignedBigInteger('id_apotek');
 

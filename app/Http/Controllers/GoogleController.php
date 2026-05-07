@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 
 class GoogleController extends Controller
 {
@@ -20,7 +21,9 @@ class GoogleController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            /** @var AbstractProvider $googleDriver */
+            $googleDriver = Socialite::driver('google');
+            $googleUser = $googleDriver->stateless()->user();
 
             $admin = Admin::query()->where('email', $googleUser->getEmail())->first();
 

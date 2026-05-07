@@ -45,7 +45,7 @@ Route::get('/admin/apotek', [AdminController::class, 'apotek'])->name('admin.lis
 Route::get('/admin/artikel', [AdminController::class, 'artikel'])->name('admin.artikel');
 Route::get('/admin/artikel/tambah', [AdminController::class, 'Tambahartikel'])->name('admin.artikel.tambah');
 Route::post('/admin/artikel/store', [AdminController::class, 'storeArtikel'])->name('admin.artikel.store');
-Route::get('/admin/apotek/{id}', [AdminController::class, 'detailApotek'])->name('admin.apotek.detail');
+Route::get('/admin/apotek/{id_apotek}', [AdminController::class, 'detailApotek'])->name('admin.apotek.detail');
 
 Route::get('/admin/artikel/edit/{id}', [AdminController::class, 'editArtikel'])->name('admin.artikel.edit');
 Route::put('/admin/artikel/update/{id}', [AdminController::class, 'updateArtikel'])->name('admin.artikel.update');
@@ -58,7 +58,7 @@ Route::get('/admin/kontak/{id}', [AdminController::class, 'detailPesan'])->name(
 Route::get('/admin/obat', [AdminController::class, 'obat'])->name('admin.obat');
 Route::get('/admin/obat/tambah', [AdminController::class, 'tambahObat'])->name('admin.tambah');
 Route::post('/admin/obat/store', [AdminController::class, 'storeObat'])->name('admin.store');
-Route::delete('/admin/obat/{id}', [AdminController::class, 'deleteObat'])->name('admin.obat.delete');
+Route::delete('/admin/obat/{id_obat}', [AdminController::class, 'deleteObat'])->name('admin.obat.delete');
 Route::get('/admin/obat/edit/{id_obat}', [AdminController::class, 'editObat'])->name('admin.obat.edit');
 Route::put('/admin/obat/update/{id_obat}', [AdminController::class, 'updateObat'])->name('admin.obat.update');
 Route::get('/admin/profile', [AdminController::class, 'ProfileApotek'])->name('admin.profile');
@@ -69,4 +69,4 @@ Route::get('/admin/laporan/export', [AdminController::class, 'exportLaporan'])->
 
 Route::get('/apotek/register', [RegisterApotekController::class, 'create'])->name('apotek.create');
 Route::post('/apotek/register', [RegisterApotekController::class, 'store'])->name('apotek.store');
-Route::get('/apotek/verifikasi/{id_apotek}', [AdminController::class, 'verifikasiApotek'])->name('apotek.verifikasi');
+Route::get('/apotek/verifikasi/{id_admin}', [AdminController::class, 'verifikasiApotek'])->name('apotek.verifikasi');

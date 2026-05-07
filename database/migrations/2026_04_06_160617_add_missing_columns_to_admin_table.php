@@ -17,13 +17,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('admin', function (Blueprint $table) {
-            $table->dropColumn([
-                'email',
-                'google_id',
-                'temp_password',
-                'id_apotek',
-                'status',
-            ]);
+            $table->dropColumn('email');
         });
     }
 };

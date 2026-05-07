@@ -59,7 +59,7 @@
                     <tbody>
                         @forelse ($dataApotek as $item)
                             <tr>
-                                <td>{{ $item->id }}</td>
+                                    <td>{{ $item->id_admin }}</td>
                                 <td>{{ $item->nama_apotek }}</td>
                                 <td>{{ $item->email }}</td>
                                 <td>{{ $item->nama_penanggung_jawab ?? '-' }}</td>
@@ -67,9 +67,9 @@
                                     <span class="badge bg-warning text-dark">{{ ucfirst($item->status) }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('apotek.verifikasi', $item->id) }}"
+                                    <a href="{{ route('apotek.verifikasi', $item->id_admin) }}"
                                         class="btn btn-sm btn-primary">Verifikasi</a>
-                                    {{-- <form action="{{ route('apotek.tolak', $item->id) }}" method="POST" class="d-inline">
+                                    {{-- <form action="{{ route('apotek.tolak', $item->id_admin) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PUT')
                                         <button type="submit" class="btn btn-sm btn-danger ms-2">Tolak</button>

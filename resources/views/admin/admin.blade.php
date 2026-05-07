@@ -33,7 +33,7 @@
                     <tbody>
                         @forelse ($admins as $admin)
                             <tr>
-                                <td>{{ $admin->id }}</td>
+                        <td>{{ $admin->id_admin }}</td>
                                 <td>{{ $admin->username }}</td>
                                 <td>{{ $admin->nama_apotek }}</td>
                                 <td>{{ $admin->email ?? '-' }}</td>

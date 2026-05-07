@@ -89,16 +89,17 @@ class AdminController extends Controller
             ->get();
 
         // jangan ubah ini (sesuai permintaan)
-        $totalObat = Obat::query()->where('id_admin', Session::get('id_admin'))->count();
+        $totalObat = $admin && $admin->id_apotek
+            ? Obat::query()->where('id_apotek', $admin->id_apotek)->count()
+            : 0;
 
-        $obatHabis = Obat::query()->where('id_admin', Session::get('id_admin'))
-            ->where('stok', 0)
-            ->count();
+        $obatHabis = $admin && $admin->id_apotek
+            ? Obat::query()->where('id_apotek', $admin->id_apotek)->where('stok', 0)->count()
+            : 0;
 
-        $obatTerbaru = Obat::query()->where('id_admin', Session::get('id_admin'))
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
+        $obatTerbaru = $admin && $admin->id_apotek
+            ? Obat::query()->where('id_apotek', $admin->id_apotek)->orderBy('created_at', 'desc')->limit(5)->get()
+            : collect();
 
         // ===== tambahan: hitung total baris di tabel obat (seluruh data) =====
         $jumlahDataObat = DB::table('obat')->count();
@@ -158,7 +159,7 @@ class AdminController extends Controller
         return view('admin.admin', compact('admins', 'title', 'adminName', 'search'));
     }
 
-    public function detailApotek(int $id)
+    public function detailApotek(int $id_apotek)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -167,7 +168,7 @@ class AdminController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        $apotek = Apotek::query()->where('id_apotek', $id)->firstOrFail();
+        $apotek = Apotek::query()->where('id_apotek', $id_apotek)->firstOrFail();
 
         $title = 'Detail Apotek';
         $adminName = Session::get('admin_name');
@@ -332,7 +333,7 @@ class AdminController extends Controller
         }
 
         $search = $request->query('search');
-        $query = Obat::query()->where('id_admin', $adminId);
+        $query = Obat::query();
 
         if ($id_apotek) {
             $query->where('id_apotek', $id_apotek);
@@ -350,7 +351,7 @@ class AdminController extends Controller
             });
         }
 
-        $obats = $query->orderBy('nama_obat')->get();
+        $obats = $query->orderBy('nama_obat', 'asc')->get();
 
         return view('admin.obat', compact('title', 'adminName', 'obats', 'search', 'apotek', 'status'));
     }
@@ -416,7 +417,6 @@ class AdminController extends Controller
             'stok' => $request->stok,
             'harga' => $request->harga,
             'id_apotek' => $idApotek,
-            'id_admin' => $adminId,
             'gambar_obat' => $pathGambar,
         ]);
 
@@ -493,7 +493,7 @@ class AdminController extends Controller
         return redirect()->route('admin.obat')->with('success', 'Data obat berhasil diperbarui.');
     }
 
-    public function deleteObat(int $id)
+    public function deleteObat(int $id_obat)
     {
         if (! Session::has('role')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu');
@@ -504,7 +504,7 @@ class AdminController extends Controller
         }
 
         /** @var Obat|null $obat */
-        $obat = Obat::query()->find($id);
+        $obat = Obat::query()->find($id_obat);
 
         if (! $obat) {
             return redirect()->route('admin.obat')->with('error', 'Data obat tidak ditemukan.');
@@ -734,10 +734,10 @@ class AdminController extends Controller
         return $pdf->download($filename);
     }
 
-    public function verifikasiApotek(int $id)
+    public function verifikasiApotek(int $id_admin)
     {
         // Ambil data admin apotek
-        $admin = Admin::query()->findOrFail($id);
+        $admin = Admin::query()->findOrFail($id_admin);
 
         // Ubah status menjadi disetujui
         $admin->update(['status' => 'disetujui']);

@@ -14,7 +14,6 @@ class Obat extends Model
 
     protected $fillable = [
         'id_apotek',
-        'id_admin',
         'nama_obat',
         'kategori',
         'harga',
@@ -29,9 +28,4 @@ class Obat extends Model
         return $this->belongsTo(Apotek::class, 'id_apotek', 'id_apotek');
     }
 
-    // Relasi ke model Admin
-    public function admin()
-    {
-        return $this->belongsTo(Admin::class, 'id_admin', 'id_admin');
-    }
 }
